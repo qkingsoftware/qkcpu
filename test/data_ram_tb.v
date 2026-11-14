@@ -71,6 +71,27 @@ module data_ram_tb;
             $display("WRITE PROTECTION TEST FAILED!");
         end
 
+        // Test 4: Synchronous read
+        address = 6'd10;
+
+        // Change the address between clock edges.
+        // data_out should still contain the previous value (99).
+        #1;
+        if (data_out == 8'd99) begin
+            $display("SYNCHRONOUS READ HOLD TEST PASSED!");
+        end else begin
+            $display("SYNCHRONOUS READ HOLD TEST FAILED!");
+        end
+
+        // After the next rising edge, data_out should become 55.
+        @(posedge clk);
+        #1;
+        if (data_out == 8'd55) begin
+            $display("SYNCHRONOUS READ UPDATE TEST PASSED!");
+        end else begin
+            $display("SYNCHRONOUS READ UPDATE TEST FAILED!");
+        end
+
         $finish;
     end
 endmodule

@@ -42,7 +42,16 @@ always @(*) begin
         end
 
         3'b010: begin // EXECUTE
-            next_state = 3'b000;
+            case (opcode)
+                4'b0000, 4'b0001,
+                4'b0010, 4'b0011,
+                4'b0100, 4'b0101,
+                4'b0110, 4'b0111:
+                    next_state = 3'b011; // WRITEBACK
+
+                default:
+                    next_state = 3'b000; // FETCH
+            endcase
         end
 
         3'b011: begin // WRITEBACK
