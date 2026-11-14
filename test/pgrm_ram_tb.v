@@ -22,7 +22,7 @@ module pgrm_ram_tb;
     initial begin
         // Test 1: Write and read back
         address = 6'd10;
-        data_in = 8'd55;
+        data_in = 16'd55;
         write_enable = 1;
         @(posedge clk);
         #1;
@@ -37,7 +37,7 @@ module pgrm_ram_tb;
 
         // Test 2: Independent memory locations
         address = 6'd20;
-        data_in = 8'd99;
+        data_in = 16'd99;
         write_enable = 1;
         @(posedge clk);
         #1;
@@ -60,7 +60,7 @@ module pgrm_ram_tb;
 
         // Test 3: Write protection
         address = 6'd20;
-        data_in = 8'd123;
+        data_in = 16'd123;
         write_enable = 0;
         @(posedge clk);
 
@@ -69,6 +69,23 @@ module pgrm_ram_tb;
             $display("WRITE PROTECTION TEST PASSED!");
         end else begin
             $display("WRITE PROTECTION TEST FAILED!");
+        end
+
+        // Test 4: Synchronous read
+        address = 6'd10;
+        #1;
+        if (data_out == 16'd99) begin
+            $display("SYNCHRONOUS READ HOLD TEST PASSED!");
+        end else begin
+            $display("SYNCHRONOUS READ HOLD TEST FAILED!");
+        end
+
+        @(posedge clk);
+        #1;
+        if (data_out == 16'd55) begin
+            $display("SYNCHRONOUS READ UPDATE TEST PASSED!");
+        end else begin
+            $display("SYNCHRONOUS READ UPDATE TEST FAILED!");
         end
 
         $finish;

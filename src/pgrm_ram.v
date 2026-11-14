@@ -7,10 +7,9 @@ module pgrm_ram (
 );
 
 reg [15:0] memory [0:63];
-    always @(*) begin
-        data_out = memory[address];
-    end
     always @(posedge clk) begin
+        data_out <= memory[address];
+
         if (write_enable) begin
             memory[address] <= data_in;
         end

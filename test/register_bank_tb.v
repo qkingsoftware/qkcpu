@@ -60,12 +60,19 @@ initial begin
     $display("Waiting for rising edge...");
     @(posedge clk);
     $display("Rising edge detected!");    #1;
-    if (read_data_a == 8'd42) begin
-        $display("2ND RESET TEST PASSED!");
+    if (read_data_a == 8'd0) begin
+        $display("SYNCHRONOUS WRITE/READ DELAY TEST PASSED!");
     end else begin
-        $display("2ND RESET TEST FAILED!");
+        $display("SYNCHRONOUS WRITE/READ DELAY TEST FAILED!");
     end 
     $display("TEST 2 - Register output: %d", read_data_a);
+    @(posedge clk);
+    #1;
+    if (read_data_a == 8'd42) begin
+        $display("REGISTER A READ TEST PASSED!");
+    end else begin
+        $display("REGISTER A READ TEST FAILED!");
+    end
 
     // test 3
     rst_n = 1;
@@ -77,29 +84,52 @@ initial begin
     $display("Waiting for rising edge...");
     @(posedge clk);
     $display("Rising edge detected!");    #1;
-    if (read_data_a == 8'd99) begin
-        $display("3RD RESET TEST PASSED!");
+    if (read_data_a == 8'd42) begin
+        $display("SYNCHRONOUS WRITE/READ DELAY TEST PASSED!");
     end else begin
-        $display("3RD RESET TEST FAILED!");
+        $display("SYNCHRONOUS WRITE/READ DELAY TEST FAILED!");
     end
     $display("TEST 3 - Register output: %d", read_data_a);
+    @(posedge clk);
+    #1;
+    if (read_data_a == 8'd99) begin
+        $display("REGISTER B READ TEST PASSED!");
+    end else begin
+        $display("REGISTER B READ TEST FAILED!");
+    end
 
-    // test 4
+    // test 4: outputs retain their last sampled values between clock edges
     write_enable = 0;
     read_select_a = 2'b00;
+    read_select_b = 2'b01;
     #1;
-    if (read_data_a == 8'd42) begin
-        $display("FOURTH INDEPENDENCE TEST PASSED!");
+    if (read_data_a == 8'd99) begin
+        $display("FOURTH SYNCHRONOUS READ HOLD TEST PASSED!");
     end else begin
-        $display("FOURTH INDEPENDENCE TEST FAILED!");
+        $display("FOURTH SYNCHRONOUS READ HOLD TEST FAILED!");
     end
     if (read_data_b == 8'd99) begin
-        $display("FOURTH INDEPENDENCE TEST PASSED!");
+        $display("FOURTH SYNCHRONOUS READ HOLD TEST PASSED!");
     end else begin
-        $display("FOURTH INDEPENDENCE TEST FAILED!");
+        $display("FOURTH SYNCHRONOUS READ HOLD TEST FAILED!");
     end
-    $display("TEST 4 - Register output: %d", read_data_a);
-    $display("TEST 4 - Register output: %d", read_data_b);
+
+    read_select_a = 2'b01;
+    read_select_b = 2'b00;
+    #1;
+    if (read_data_a == 8'd99 && read_data_b == 8'd99) begin
+        $display("FIFTH SYNCHRONOUS READ HOLD TEST PASSED!");
+    end else begin
+        $display("FIFTH SYNCHRONOUS READ HOLD TEST FAILED!");
+    end
+
+    @(posedge clk);
+    #1;
+    if (read_data_a == 8'd99 && read_data_b == 8'd42) begin
+        $display("SYNCHRONOUS READ UPDATE TEST PASSED!");
+    end else begin
+        $display("SYNCHRONOUS READ UPDATE TEST FAILED!");
+    end
 
     $finish;
 end

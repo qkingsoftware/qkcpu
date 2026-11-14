@@ -95,12 +95,14 @@ initial begin
     read_select_a = 2'd0;
     read_select_b = 2'd1;
     opcode = 4'b0000;
+    @(posedge clk);
     #1;
     if (alu_result == 8'd52) begin
         $display("DATAPATH ALU TEST PASSED!");
     end else begin
         $display("DATAPATH ALU TEST FAILED!");
     end
+
     @(posedge clk);
     #1;
     if (dut.register_bank.regR == 8'd52) begin
