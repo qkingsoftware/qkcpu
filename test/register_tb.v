@@ -43,18 +43,31 @@
         end
         $display("TEST 2 - Register output: %d", b);
 
-        // 3nd test
+        // 3rd test
         rst_n = 1;
         enable = 0;
         a = 8'd99;
         @(posedge clk);
         #1;
         if (b == 8'd42) begin
-        $display("3ND RESET TEST PASSED!");
+        $display("3RD RESET TEST PASSED!");
         end else begin
-        $display("3ND RESET TEST FAILED!");
+        $display("3RD RESET TEST FAILED!");
         end
         $display("TEST 3 - Register output: %d", b);
+
+        // 4th test
+        rst_n = 1;
+        enable = 1;
+        a = 8'd99;
+        @(posedge clk);
+        #1;
+        if (b == 8'd99) begin
+        $display("4TH RESET TEST PASSED!");
+        end else begin
+        $display("4TH RESET TEST FAILED!");
+        end
+        $display("TEST 4 - Register output: %d", b);
         $finish;
 
     end
