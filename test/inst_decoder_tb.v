@@ -84,7 +84,7 @@ module inst_decoder_tb;
         end
         $display("TEST 5 - Opcode: %d, Address: %d", opcode, address);
 
-        // test 6 JZ
+        // test 6 JZ (Jump if Zero)
         instruction = 16'b1110100011000000;
         #1;
         if (opcode == 4'd14 && address == 6'd35 &&

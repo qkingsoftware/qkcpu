@@ -14,6 +14,10 @@ module tt_um_example (
     input  wire       ena,
     input  wire       clk,
     input  wire       rst_n
+`ifdef USE_POWER_PINS
+    , inout wire VPWR,
+    inout wire VGND
+`endif
 );
 
   wire load_mode = ui_in[7];
@@ -40,6 +44,10 @@ module tt_um_example (
       .write_enable(load_mode),
       .byte_write_enable(program_byte_enable),
       .data_out(program_data_out)
+`ifdef USE_POWER_PINS
+      ,.VPWR(VPWR),
+      .VGND(VGND)
+`endif
   );
 
   cpu_core cpu (
@@ -63,6 +71,10 @@ module tt_um_example (
       .data_in(data_write_data),
       .write_enable(data_write_enable),
       .data_out(data_read_data)
+`ifdef USE_POWER_PINS
+      ,.VPWR(VPWR),
+      .VGND(VGND)
+`endif
   );
 
   always @(*) begin

@@ -4,11 +4,17 @@ module dataram (
     input wire [7:0] data_in,
     input wire write_enable,
     output wire [7:0] data_out
+`ifdef USE_POWER_PINS
+    , inout wire VPWR,
+    inout wire VGND
+`endif
 );
 
 wire [7:0] write_enable_mask = {8{~write_enable}};
+`ifndef USE_POWER_PINS
 supply1 VPWR;
 supply0 VGND;
+`endif
 
 /*
  * The macro model requires CEN to transition from high to low once after

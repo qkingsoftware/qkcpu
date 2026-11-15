@@ -5,6 +5,10 @@ module pgrm_ram (
     input wire write_enable,
     input wire [1:0] byte_write_enable,
     output wire [15:0] data_out
+`ifdef USE_POWER_PINS
+    , inout wire VPWR,
+    inout wire VGND
+`endif
 );
 
 wire [7:0] low_byte;
@@ -13,8 +17,10 @@ wire low_write_enable = write_enable && byte_write_enable[0];
 wire high_write_enable = write_enable && byte_write_enable[1];
 wire [7:0] low_write_mask = {8{~low_write_enable}};
 wire [7:0] high_write_mask = {8{~high_write_enable}};
+`ifndef USE_POWER_PINS
 supply1 VPWR;
 supply0 VGND;
+`endif
 
 /*
  * The macro model requires CEN to transition from high to low once after
