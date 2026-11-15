@@ -78,6 +78,6 @@ module tt_um_example (
   assign uio_out = load_mode ? 8'b0 : cpu_output;
   assign uio_oe = load_mode ? 8'b0 : 8'hff;
 
-  wire _unused = &{ena, rst_n, 1'b0};
+  wire _unused = &{ena, rst_n, cpu_halted, 1'b0};
 
 endmodule

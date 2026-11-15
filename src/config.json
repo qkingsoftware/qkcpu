@@ -55,8 +55,8 @@
       "lef": [
         "dir::../macros/gf180_sram_128x8/gf180mcu_fd_ip_sram__sram128x8m8wm1.lef"
       ],
-      "nl": [
-        "dir::../macros/gf180_sram_128x8/gf180mcu_fd_ip_sram__sram128x8m8wm1.v"
+      "vh": [
+        "dir::../macros/gf180_sram_128x8/gf180mcu_fd_ip_sram__sram128x8m8wm1.vh"
       ],
       "lib": {
         "*_tt_025C_3v30": [
