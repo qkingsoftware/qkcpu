@@ -61,6 +61,12 @@
       "lib": {
         "*_tt_025C_3v30": [
           "dir::../macros/gf180_sram_128x8/gf180mcu_fd_ip_sram__sram128x8m8wm1__tt_025C_3v30.lib"
+        ],
+        "*_ss_125C_3v00": [
+          "dir::../macros/gf180_sram_128x8/gf180mcu_fd_ip_sram__sram128x8m8wm1__ss_125C_3v00.lib"
+        ],
+        "*_ff_n40C_3v60": [
+          "dir::../macros/gf180_sram_128x8/gf180mcu_fd_ip_sram__sram128x8m8wm1__ff_n40C_3v60.lib"
         ]
       },
       "spice": [
@@ -68,7 +74,14 @@
       ]
     }
   },
-  "PDN_MACRO_CONNECTIONS": "program_ram.low_byte_ram VPWR VGND VDD VSS program_ram.high_byte_ram VPWR VGND VDD VSS data_memory.data_memory VPWR VGND VDD VSS",
+  "PDN_CONNECT_MACROS_TO_GRID": true,
+  "PDN_ENABLE_GLOBAL_CONNECTIONS": true,
+  "PDN_MACRO_CONNECTIONS": [
+    "program_ram.low_byte_ram VPWR VGND VDD VSS",
+    "program_ram.high_byte_ram VPWR VGND VDD VSS",
+    "data_memory.data_memory VPWR VGND VDD VSS"
+  ],
+  "PDN_CFG": "dir::pdn_cfg.tcl",
   "VERILOG_POWER_DEFINE": "USE_POWER_PINS",
 
   "//": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
