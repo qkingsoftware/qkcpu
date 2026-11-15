@@ -22,6 +22,11 @@ supply1 VPWR;
 supply0 VGND;
 `endif
 
+// Yeah this was the macro part, this was done using AI sadly
+// I am heavily dissapointed in myself for not doing this myself
+// I got stuck for hours so I had too
+// I do understand how it works now for the most part
+// Macro's are hard, but its way better than my sloppy RTL async read sync write ram for on the ASIC
 /*
  * The macro model requires CEN to transition from high to low once after
  * startup. The physical macro remains enabled after that transition.
