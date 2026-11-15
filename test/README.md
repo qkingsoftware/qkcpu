@@ -16,6 +16,15 @@ To run the RTL simulation:
 make -B
 ```
 
+The standalone program RAM test uses the two 128x8 SRAM macro models:
+
+```sh
+iverilog -o pgrm_ram_tb.vvp \
+  ../macros/gf180_sram_128x8/gf180mcu_fd_ip_sram__sram128x8m8wm1.v \
+  ../src/pgrm_ram.v pgrm_ram_tb.v
+vvp pgrm_ram_tb.vvp
+```
+
 To run gatelevel simulation, first harden your project and copy `../runs/wokwi/results/final/verilog/gl/{your_module_name}.v` to `gate_level_netlist.v`.
 
 Then run:

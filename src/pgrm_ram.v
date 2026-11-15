@@ -1,17 +1,59 @@
 module pgrm_ram (
     input wire clk,
-    input wire [5:0] address,
+    input wire [6:0] address,
     input wire [15:0] data_in,
     input wire write_enable,
-    output reg [15:0] data_out
+    input wire [1:0] byte_write_enable,
+    output wire [15:0] data_out
 );
 
-reg [15:0] memory [0:63];
-    always @(posedge clk) begin
-        data_out <= memory[address];
+wire [7:0] low_byte;
+wire [7:0] high_byte;
+wire low_write_enable = write_enable && byte_write_enable[0];
+wire high_write_enable = write_enable && byte_write_enable[1];
+wire [7:0] low_write_mask = {8{~low_write_enable}};
+wire [7:0] high_write_mask = {8{~high_write_enable}};
+supply1 VPWR;
+supply0 VGND;
 
-        if (write_enable) begin
-            memory[address] <= data_in;
-        end
-    end
-    endmodule
+/*
+ * The macro model requires CEN to transition from high to low once after
+ * startup. The physical macro remains enabled after that transition.
+ */
+`ifdef SYNTHESIS
+wire macro_cen = 1'b0;
+`else
+reg macro_cen;
+initial begin
+    macro_cen = 1'b1;
+    #1 macro_cen = 1'b0;
+end
+`endif
+
+gf180mcu_fd_ip_sram__sram128x8m8wm1 low_byte_ram (
+    .CLK(clk),
+    .CEN(macro_cen),
+    .GWEN(~low_write_enable),
+    .WEN(low_write_mask),
+    .A(address),
+    .D(data_in[7:0]),
+    .Q(low_byte),
+    .VDD(VPWR),
+    .VSS(VGND)
+);
+
+gf180mcu_fd_ip_sram__sram128x8m8wm1 high_byte_ram (
+    .CLK(clk),
+    .CEN(macro_cen),
+    .GWEN(~high_write_enable),
+    .WEN(high_write_mask),
+    .A(address),
+    .D(data_in[15:8]),
+    .Q(high_byte),
+    .VDD(VPWR),
+    .VSS(VGND)
+);
+
+assign data_out = {high_byte, low_byte};
+
+endmodule

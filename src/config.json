@@ -33,6 +33,47 @@
 
   "//": "Configuration docs: https://librelane.readthedocs.io/en/latest/reference/configuration.html",
 
+  "MACROS": {
+    "gf180mcu_fd_ip_sram__sram128x8m8wm1": {
+      "instances": {
+        "program_ram.low_byte_ram": {
+          "location": [20, 25],
+          "orientation": "N"
+        },
+        "program_ram.high_byte_ram": {
+          "location": [470, 25],
+          "orientation": "N"
+        },
+        "data_memory.data_memory": {
+          "location": [920, 25],
+          "orientation": "N"
+        }
+      },
+      "gds": [
+        "dir::../macros/gf180_sram_128x8/gf180mcu_fd_ip_sram__sram128x8m8wm1.gds"
+      ],
+      "lef": [
+        "dir::../macros/gf180_sram_128x8/gf180mcu_fd_ip_sram__sram128x8m8wm1.lef"
+      ],
+      "nl": [
+        "dir::../macros/gf180_sram_128x8/gf180mcu_fd_ip_sram__sram128x8m8wm1.v"
+      ],
+      "lib": {
+        "*_tt_025C_3v30": [
+          "dir::../macros/gf180_sram_128x8/gf180mcu_fd_ip_sram__sram128x8m8wm1__tt_025C_3v30.lib"
+        ]
+      },
+      "spice": [
+        "dir::../macros/gf180_sram_128x8/gf180mcu_fd_ip_sram__sram128x8m8wm1.cdl"
+      ]
+    }
+  },
+  "PDN_MACRO_CONNECTIONS": [
+    "program_ram.low_byte_ram VDD VSS VPWR VGND",
+    "program_ram.high_byte_ram VDD VSS VPWR VGND",
+    "data_memory.data_memory VDD VSS VPWR VGND"
+  ],
+
   "//": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
   "//": "!!! DO NOT CHANGE ANYTHING BELOW THIS POINT !!!",
   "//": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",

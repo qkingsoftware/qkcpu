@@ -8,7 +8,7 @@ project:
   clock_hz:     0       # Clock frequency in Hz (or 0 if not applicable)
 
   # How many tiles your design occupies? A single tile is about 340x160 uM.
-  tiles: "2x2"          # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 3x4 or 4x4
+  tiles: "4x2"          # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 3x4 or 4x4
 
   # Your top module name must start with "tt_um_". Make it unique by including your github username:
   top_module:  "tt_um_example"
@@ -18,39 +18,43 @@ project:
   # Don't forget to also update `PROJECT_SOURCES` in test/Makefile.
   source_files:
     - "project.v"
+    - "cpu_core.v"
+    - "alu.v"
+    - "pgrm_ram.v"
+    - "data_ram.v"
 
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
 # This section is for the datasheet/website. Use descriptive names (e.g., RX, TX, MOSI, SCL, SEG_A, etc.).
 pinout:
   # Inputs
-  ui[0]: ""
-  ui[1]: ""
-  ui[2]: ""
-  ui[3]: ""
-  ui[4]: ""
-  ui[5]: ""
-  ui[6]: ""
-  ui[7]: ""
+  ui[0]: "Program address bit 0 / register select bit 0"
+  ui[1]: "Program address bit 1 / register select bit 1"
+  ui[2]: "Program address bit 2"
+  ui[3]: "Program address bit 3"
+  ui[4]: "Program address bit 4 / register select"
+  ui[5]: "Program address bit 5 / register select"
+  ui[6]: "Loader high-byte select"
+  ui[7]: "Program loader enable"
 
   # Outputs
-  uo[0]: ""
-  uo[1]: ""
-  uo[2]: ""
-  uo[3]: ""
-  uo[4]: ""
-  uo[5]: ""
-  uo[6]: ""
-  uo[7]: ""
+  uo[0]: "Selected CPU register bit 0"
+  uo[1]: "Selected CPU register bit 1"
+  uo[2]: "Selected CPU register bit 2"
+  uo[3]: "Selected CPU register bit 3"
+  uo[4]: "Selected CPU register bit 4"
+  uo[5]: "Selected CPU register bit 5"
+  uo[6]: "Selected CPU register bit 6"
+  uo[7]: "Selected CPU register bit 7"
 
   # Bidirectional pins
-  uio[0]: ""
-  uio[1]: ""
-  uio[2]: ""
-  uio[3]: ""
-  uio[4]: ""
-  uio[5]: ""
-  uio[6]: ""
-  uio[7]: ""
+  uio[0]: "Program instruction data bit 0 while loading"
+  uio[1]: "Program instruction data bit 1 while loading"
+  uio[2]: "Program instruction data bit 2 while loading"
+  uio[3]: "Program instruction data bit 3 while loading"
+  uio[4]: "Program instruction data bit 4 while loading"
+  uio[5]: "Program instruction data bit 5 while loading"
+  uio[6]: "Program instruction data bit 6 while loading"
+  uio[7]: "Program instruction data bit 7 while loading"
 
 # Do not change!
 yaml_version: 6
