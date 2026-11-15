@@ -40,7 +40,7 @@ jobs:
           PDK_VERSION: 54435919abffb937387ec956209f9cf5fd2dfbee
         run: |
           set -euo pipefail
-          CELL=gf180mcu_fd_ip_sram__sram64x8m8wm1
+          CELL=gf180mcu_fd_ip_sram__sram128x8m8wm1
           PDK_DIR="$PDK_ROOT/ciel/gf180mcu/versions/$PDK_VERSION/gf180mcuD"
           MAGICRC="$PDK_DIR/libs.tech/magic/gf180mcuD.magicrc"
           LEF="src/gf180mcu_fd_ip_sram/cells/$CELL/$CELL.lef"

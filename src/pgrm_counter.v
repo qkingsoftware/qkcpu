@@ -1,18 +1,33 @@
-module pgrm_counter(
+`default_nettype none
+
+module pgrm_counter (
     input wire clk,
     input wire rst_n,
     input wire enable,
-    input wire [0:0] jump,
+    input wire jump,
+    input wire call,
+    input wire ret,
     input wire [5:0] jump_address,
     output reg [5:0] count
 );
 
-    always @(posedge clk)
+    reg [5:0] return_addr;
+
+    always @(posedge clk) begin
         if (!rst_n) begin
-            count <= 6'd0;
+            count       <= 6'd0;
+            return_addr <= 6'd0;
+        end else if (ret) begin
+            count <= return_addr;
         end else if (jump) begin
+            if (call)
+                return_addr <= count + 6'd1;
             count <= jump_address;
         end else if (enable) begin
             count <= count + 6'd1;
         end
+    end
+
 endmodule
+
+`default_nettype wire

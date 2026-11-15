@@ -24,32 +24,39 @@
   "MAGIC_DEF_LABELS": 0,
   "MAGIC_WRITE_LEF_PINONLY": 1,
   "MACROS": {
-    "gf180mcu_fd_ip_sram__sram64x8m8wm1": {
+    "gf180mcu_fd_ip_sram__sram128x8m8wm1": {
       "gds": [
-        "dir::gf180mcu_fd_ip_sram/cells/gf180mcu_fd_ip_sram__sram64x8m8wm1/gf180mcu_fd_ip_sram__sram64x8m8wm1.gds"
+        "dir::gf180mcu_fd_ip_sram/cells/gf180mcu_fd_ip_sram__sram128x8m8wm1/gf180mcu_fd_ip_sram__sram128x8m8wm1.gds"
       ],
       "lef": [
-        "dir::gf180mcu_fd_ip_sram/cells/gf180mcu_fd_ip_sram__sram64x8m8wm1/gf180mcu_fd_ip_sram__sram64x8m8wm1.lef"
+        "dir::gf180mcu_fd_ip_sram/cells/gf180mcu_fd_ip_sram__sram128x8m8wm1/gf180mcu_fd_ip_sram__sram128x8m8wm1.lef"
       ],
       "vh": [
-        "dir::macros/gf180mcu_fd_ip_sram__sram64x8m8wm1.blackbox.v"
+        "dir::macros/gf180mcu_fd_ip_sram__sram128x8m8wm1.blackbox.v"
       ],
       "lib": {
         "*_tt_025C_3v30": [
-          "dir::gf180mcu_fd_ip_sram/cells/gf180mcu_fd_ip_sram__sram64x8m8wm1/gf180mcu_fd_ip_sram__sram64x8m8wm1__tt_025C_3v30.lib"
+          "dir::gf180mcu_fd_ip_sram/cells/gf180mcu_fd_ip_sram__sram128x8m8wm1/gf180mcu_fd_ip_sram__sram128x8m8wm1__tt_025C_3v30.lib"
         ],
         "*_ss_125C_3v00": [
-          "dir::gf180mcu_fd_ip_sram/cells/gf180mcu_fd_ip_sram__sram64x8m8wm1/gf180mcu_fd_ip_sram__sram64x8m8wm1__ss_125C_3v00.lib"
+          "dir::gf180mcu_fd_ip_sram/cells/gf180mcu_fd_ip_sram__sram128x8m8wm1/gf180mcu_fd_ip_sram__sram128x8m8wm1__ss_125C_3v00.lib"
         ],
         "*_ff_n40C_3v60": [
-          "dir::gf180mcu_fd_ip_sram/cells/gf180mcu_fd_ip_sram__sram64x8m8wm1/gf180mcu_fd_ip_sram__sram64x8m8wm1__ff_n40C_3v60.lib"
+          "dir::gf180mcu_fd_ip_sram/cells/gf180mcu_fd_ip_sram__sram128x8m8wm1/gf180mcu_fd_ip_sram__sram128x8m8wm1__ff_n40C_3v60.lib"
         ]
       },
       "instances": {
-        "u_sram": {
+        "u_sram0": {
           "location": [
-            140,
-            45
+            60,
+            180
+          ],
+          "orientation": "N"
+        },
+        "u_sram1": {
+          "location": [
+            540,
+            180
           ],
           "orientation": "N"
         }
@@ -59,7 +66,8 @@
   "PDN_CONNECT_MACROS_TO_GRID": true,
   "PDN_ENABLE_GLOBAL_CONNECTIONS": true,
   "PDN_MACRO_CONNECTIONS": [
-    "u_sram VPWR VGND VDD VSS"
+    "u_sram0 VPWR VGND VDD VSS",
+    "u_sram1 VPWR VGND VDD VSS"
   ],
   "PDN_CFG": "dir::pdn_cfg.tcl",
   "meta": {
@@ -67,10 +75,11 @@
   },
   "MAGIC_DRC_USE_GDS": false,
   "MAGIC_EXT_ABSTRACT_CELLS": [
-    "gf180mcu_fd_sc_mcu7t5v0__.*"
+    "gf180mcu_fd_sc_mcu7t5v0__.*",
+    "gf180mcu_fd_ip_sram__sram128x8m8wm1"
   ],
   "MAGIC_DRC_MAGLEFS": [
-    "dir::macros/maglef/gf180mcu_fd_ip_sram__sram64x8m8wm1.mag"
+    "dir::macros/maglef/gf180mcu_fd_ip_sram__sram128x8m8wm1.mag"
   ],
   "MAGIC_EXT_USE_GDS": false,
   "MAGIC_EXT_ABSTRACT": true,

@@ -18,10 +18,10 @@ import gdstk
 
 GDS_PATH = Path(
     "src/gf180mcu_fd_ip_sram/cells/"
-    "gf180mcu_fd_ip_sram__sram64x8m8wm1/"
-    "gf180mcu_fd_ip_sram__sram64x8m8wm1.gds"
+    "gf180mcu_fd_ip_sram__sram128x8m8wm1/"
+    "gf180mcu_fd_ip_sram__sram128x8m8wm1.gds"
 )
-ROOT_CELL = "gf180mcu_fd_ip_sram__sram64x8m8wm1"
+ROOT_CELL = "gf180mcu_fd_ip_sram__sram128x8m8wm1"
 UNSUPPORTED_LAYER = 58
 CELL_PREFIX = "GF180S_"
 

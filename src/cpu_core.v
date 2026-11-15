@@ -1,174 +1,159 @@
+`default_nettype none
+
 module cpu_core (
     input wire clk,
     input wire rst_n,
     input wire run_enable,
+    input wire [7:0] input_port,
+
     output wire [6:0] program_address,
-    input wire [15:0] program_data,
-    output reg [6:0] data_address,
-    output reg [7:0] data_write_data,
-    output reg data_write_enable,
+    input wire [7:0] program_data,
+
+    output wire [6:0] data_address,
+    output wire [7:0] data_write_data,
+    output wire data_write_enable,
     input wire [7:0] data_read_data,
+
     output reg [7:0] output_port,
     output wire [31:0] register_values,
     output wire halted
 );
 
-localparam STATE_FETCH = 3'd0;
-localparam STATE_FETCH_WAIT = 3'd1;
-localparam STATE_EXECUTE = 3'd2;
-localparam STATE_LOAD_WAIT = 3'd3;
-localparam STATE_LOAD_CAPTURE = 3'd4;
-localparam STATE_HALTED = 3'd5;
+    reg [15:0] instruction;
 
-reg [2:0] state;
-reg [6:0] program_counter;
-reg [15:0] instruction;
-reg [7:0] registers [0:3];
-reg [1:0] load_destination;
-reg [3:0] alu_opcode;
-wire [7:0] alu_result;
+    wire [3:0] opcode;
+    wire [1:0] dest;
+    wire [1:0] src_a;
+    wire [1:0] src_b;
+    wire [7:0] immediate;
+    wire [5:0] jump_address;
+    wire [6:0] memory_address;
+    wire io_direction;
+    wire mem_mode;
+    wire [1:0] branch_cond;
+    wire [1:0] sys_cmd;
 
-wire [3:0] opcode = instruction[15:12];
-wire [1:0] destination = instruction[11:10];
-wire [1:0] source_a = instruction[9:8];
-wire [1:0] source_b = instruction[7:6];
-wire [7:0] immediate = instruction[9:2];
-wire [6:0] memory_address = {1'b0, instruction[9:4]};
-wire [6:0] jump_address = {1'b0, instruction[11:6]};
+    wire fetch_byte_sel;
+    wire inst_latch_lo;
+    wire inst_latch_hi;
+    wire pc_enable;
+    wire pc_jump;
+    wire pc_call;
+    wire pc_ret;
+    wire reg_write_enable;
+    wire [2:0] reg_write_src;
+    wire out_enable;
 
-assign program_address = program_counter;
-assign register_values = {registers[3], registers[2], registers[1], registers[0]};
-assign halted = state == STATE_HALTED;
+    wire [7:0] reg_data_a;
+    wire [7:0] reg_data_b;
+    reg  [7:0] reg_write_data;
 
-alu core_alu (
-    .a(registers[source_a]),
-    .b(registers[source_b]),
-    .opcode(alu_opcode),
-    .result(alu_result)
-);
+    wire [7:0] alu_result;
+    wire [5:0] pc_count;
 
-always @(*) begin
-    alu_opcode = opcode;
-end
+    assign program_address = {pc_count, fetch_byte_sel};
+    assign data_address    = mem_mode ? (opcode == 4'b1010 ? reg_data_b[6:0] : reg_data_a[6:0]) : memory_address;
+    assign data_write_data = reg_data_a;
 
-always @(posedge clk) begin
-    data_write_enable <= 1'b0;
+    always @(posedge clk) begin
+        if (!rst_n) begin
+            instruction <= 16'd0;
+        end else begin
+            if (inst_latch_lo)
+                instruction[7:0] <= program_data;
+            if (inst_latch_hi)
+                instruction[15:8] <= program_data;
+        end
+    end
 
-    if (!rst_n) begin
-        state <= STATE_FETCH;
-        program_counter <= 7'd0;
-        instruction <= 16'd0;
-        data_address <= 7'd0;
-        data_write_data <= 8'd0;
-        output_port <= 8'd0;
-        load_destination <= 2'd0;
-        registers[0] <= 8'd0;
-        registers[1] <= 8'd0;
-        registers[2] <= 8'd0;
-        registers[3] <= 8'd0;
-    end else if (!run_enable) begin
-        state <= STATE_FETCH;
-    end else begin
-        case (state)
-            STATE_FETCH: begin
-                state <= STATE_FETCH_WAIT;
-            end
+    always @(posedge clk) begin
+        if (!rst_n) begin
+            output_port <= 8'd0;
+        end else if (out_enable) begin
+            output_port <= reg_data_a;
+        end
+    end
 
-            STATE_FETCH_WAIT: begin
-                instruction <= program_data;
-                state <= STATE_EXECUTE;
-            end
+    inst_decoder u_decoder (
+        .instruction    (instruction),
+        .opcode         (opcode),
+        .dest           (dest),
+        .src_a          (src_a),
+        .src_b          (src_b),
+        .immediate      (immediate),
+        .jump_address   (jump_address),
+        .memory_address (memory_address),
+        .io_direction   (io_direction),
+        .mem_mode       (mem_mode),
+        .branch_cond    (branch_cond),
+        .sys_cmd        (sys_cmd)
+    );
 
-            STATE_EXECUTE: begin
-                case (opcode)
-                    4'b0000,
-                    4'b0001,
-                    4'b0010,
-                    4'b0011,
-                    4'b0100,
-                    4'b0101,
-                    4'b0110,
-                    4'b0111: begin
-                        registers[destination] <= alu_result;
-                        program_counter <= program_counter + 7'd1;
-                        state <= STATE_FETCH;
-                    end
+    control_unit u_ctrl (
+        .clk               (clk),
+        .rst_n             (rst_n),
+        .run_enable        (run_enable),
+        .opcode            (opcode),
+        .is_zero           (reg_data_a == 8'd0),
+        .io_direction      (io_direction),
+        .branch_cond       (branch_cond),
+        .sys_cmd           (sys_cmd),
+        .fetch_byte_sel    (fetch_byte_sel),
+        .inst_latch_lo     (inst_latch_lo),
+        .inst_latch_hi     (inst_latch_hi),
+        .pc_enable         (pc_enable),
+        .pc_jump           (pc_jump),
+        .pc_call           (pc_call),
+        .pc_ret            (pc_ret),
+        .reg_write_enable  (reg_write_enable),
+        .reg_write_src     (reg_write_src),
+        .data_write_enable (data_write_enable),
+        .out_enable        (out_enable),
+        .halted            (halted)
+    );
 
-                    4'b1000: begin
-                        registers[destination] <= immediate;
-                        program_counter <= program_counter + 7'd1;
-                        state <= STATE_FETCH;
-                    end
-
-                    4'b1001: begin
-                        data_address <= memory_address;
-                        load_destination <= destination;
-                        state <= STATE_LOAD_WAIT;
-                    end
-
-                    4'b1010: begin
-                        data_address <= memory_address;
-                        data_write_data <= registers[source_a];
-                        data_write_enable <= 1'b1;
-                        program_counter <= program_counter + 7'd1;
-                        state <= STATE_FETCH;
-                    end
-
-                    4'b1011: begin
-                        registers[destination] <= registers[source_a];
-                        program_counter <= program_counter + 7'd1;
-                        state <= STATE_FETCH;
-                    end
-
-                    4'b1100: begin
-                        output_port <= registers[source_a];
-                        program_counter <= program_counter + 7'd1;
-                        state <= STATE_FETCH;
-                    end
-
-                    4'b1101: begin
-                        program_counter <= jump_address;
-                        state <= STATE_FETCH;
-                    end
-
-                    4'b1110: begin
-                        if (registers[source_a] == 8'd0)
-                            program_counter <= jump_address;
-                        else
-                            program_counter <= program_counter + 7'd1;
-                        state <= STATE_FETCH;
-                    end
-
-                    4'b1111: begin
-                        state <= STATE_HALTED;
-                    end
-
-                    default: begin
-                        program_counter <= program_counter + 7'd1;
-                        state <= STATE_FETCH;
-                    end
-                endcase
-            end
-
-            STATE_LOAD_WAIT: begin
-                state <= STATE_LOAD_CAPTURE;
-            end
-
-            STATE_LOAD_CAPTURE: begin
-                registers[load_destination] <= data_read_data;
-                program_counter <= program_counter + 7'd1;
-                state <= STATE_FETCH;
-            end
-
-            STATE_HALTED: begin
-                state <= STATE_HALTED;
-            end
-
-            default: begin
-                state <= STATE_FETCH;
-            end
+    always @(*) begin
+        case (reg_write_src)
+            3'd0: reg_write_data = alu_result;
+            3'd1: reg_write_data = immediate;
+            3'd2: reg_write_data = data_read_data;
+            3'd3: reg_write_data = reg_data_a;
+            3'd4: reg_write_data = input_port;
+            default: reg_write_data = reg_data_a;
         endcase
     end
-end
+
+    register_bank u_regbank (
+        .clk             (clk),
+        .rst_n           (rst_n),
+        .write_enable    (reg_write_enable),
+        .write_select    (dest),
+        .write_data      (reg_write_data),
+        .read_select_a   (src_a),
+        .read_select_b   (src_b),
+        .read_data_a     (reg_data_a),
+        .read_data_b     (reg_data_b),
+        .register_values (register_values)
+    );
+
+    alu u_alu (
+        .a      (reg_data_a),
+        .b      (reg_data_b),
+        .opcode (opcode),
+        .result (alu_result)
+    );
+
+    pgrm_counter u_pc (
+        .clk          (clk),
+        .rst_n        (rst_n),
+        .enable       (pc_enable),
+        .jump         (pc_jump),
+        .call         (pc_call),
+        .ret          (pc_ret),
+        .jump_address (jump_address),
+        .count        (pc_count)
+    );
 
 endmodule
+
+`default_nettype wire
