@@ -68,7 +68,7 @@
       ]
     }
   },
-  "PDN_MACRO_CONNECTIONS": "program_ram.low_byte_ram VDD VSS VPWR VGND program_ram.high_byte_ram VDD VSS VPWR VGND data_memory.data_memory VDD VSS VPWR VGND",
+  "PDN_MACRO_CONNECTIONS": "program_ram.low_byte_ram VPWR VGND VDD VSS program_ram.high_byte_ram VPWR VGND VDD VSS data_memory.data_memory VPWR VGND VDD VSS",
   "VERILOG_POWER_DEFINE": "USE_POWER_PINS",
 
   "//": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
