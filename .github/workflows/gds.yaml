@@ -13,6 +13,51 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Install GF180 PDK
+        uses: TinyTapeout/ciel-action@v1
+        with:
+          pdk_name: gf180mcu
+          pdk_version: 54435919abffb937387ec956209f9cf5fd2dfbee
+          pdk_root: /home/runner/.ciel
+
+      - name: Build compatible Magic
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y build-essential m4 tcsh tcl-dev tk-dev wget
+          wget -q https://opencircuitdesign.com/~tim/programs/magic/archive/magic-8.3.685.tgz -O /tmp/magic-8.3.685.tgz
+          tar -xzf /tmp/magic-8.3.685.tgz -C /tmp
+          cd /tmp/magic-8.3.685
+          CFLAGS="-std=gnu99 -Wno-deprecated-non-prototype -Wno-implicit-function-declaration -Wno-parentheses -Wno-macro-redefined" ./configure --prefix=/usr/local --with-tcl --without-x
+          make -j2
+          sudo make install
+
+      - name: Generate SRAM Magic abstract view
+        env:
+          PDK_ROOT: /home/runner/.ciel
+          PDK_VERSION: 54435919abffb937387ec956209f9cf5fd2dfbee
+        run: |
+          set -euo pipefail
+          CELL=gf180mcu_fd_ip_sram__sram128x8m8wm1
+          PDK_DIR="$PDK_ROOT/ciel/gf180mcu/versions/$PDK_VERSION/gf180mcuD"
+          MAGICRC="$PDK_DIR/libs.tech/magic/gf180mcuD.magicrc"
+          LEF="macros/gf180_sram_128x8/$CELL.lef"
+          OUT="src/macros/maglef/$CELL.mag"
+
+          test -f "$MAGICRC"
+          test -f "$LEF"
+          mkdir -p "$(dirname "$OUT")"
+          export MAGTYPE=maglef
+          magic -dnull -noconsole -rcfile "$MAGICRC" <<EOF
+          drc off
+          lef read $LEF
+          load $CELL
+          save $OUT
+          quit -noprompt
+          EOF
+
+          test -s "$OUT"
+
       - name: Install GDS editing dependency
         run: python3 -m pip install gdstk --break-system-packages
 

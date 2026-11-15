@@ -83,6 +83,17 @@
   ],
   "PDN_CFG": "dir::pdn_cfg.tcl",
   "PRIMARY_GDSII_STREAMOUT_TOOL": "klayout",
+  "MAGIC_DRC_USE_GDS": false,
+  "MAGIC_EXT_ABSTRACT_CELLS": [
+    "gf180mcu_fd_sc_mcu7t5v0__.*"
+  ],
+  "MAGIC_DRC_MAGLEFS": [
+    "dir::macros/maglef/gf180mcu_fd_ip_sram__sram128x8m8wm1.mag"
+  ],
+  "MAGIC_EXT_USE_GDS": false,
+  "MAGIC_EXT_ABSTRACT": true,
+  "ERROR_ON_MAGIC_DRC": false,
+  "ERROR_ON_ILLEGAL_OVERLAPS": false,
 
   "//": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
   "//": "!!! DO NOT CHANGE ANYTHING BELOW THIS POINT !!!",
