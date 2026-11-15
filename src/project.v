@@ -1,6 +1,16 @@
 /*
- * Copyright (c) 2026 QKing
+ * Copyright (c) 2026 opilitethesmartdev
  * SPDX-License-Identifier: Apache-2.0
+ *
+ * Tiny Tapeout GF180MCU SRAM example.
+ *
+ * ui_in[5:0]  SRAM address
+ * ui_in[6]    Write enable (active high)
+ * uio_in      Write data
+ * uo_out      Read data
+ *
+ * The SRAM itself has no reset. rst_n is used only to hold CEN inactive
+ * until the system has completed reset.
  */
 
 `default_nettype none
@@ -13,71 +23,75 @@ module tt_um_example (
     output wire [7:0] uio_oe,
     input  wire       ena,
     input  wire       clk,
-    input wire       rst_n
+    input  wire       rst_n
 );
 
-  wire load_mode = ui_in[7];
-  wire [6:0] loader_address = {1'b0, ui_in[5:0]};
-  wire [1:0] loader_byte_enable = ui_in[6] ? 2'b10 : 2'b01;
-  wire [15:0] program_data_out;
-  wire [6:0] cpu_program_address;
-  wire [6:0] program_address = load_mode ? loader_address : cpu_program_address;
-  wire [15:0] program_data_in = ui_in[6] ? {uio_in, 8'b0} : {8'b0, uio_in};
-  wire [1:0] program_byte_enable = load_mode ? loader_byte_enable : 2'b00;
-  wire [6:0] data_address;
-  wire [7:0] data_write_data;
-  wire data_write_enable;
-  wire [7:0] data_read_data;
-  wire [7:0] cpu_output;
-  wire [31:0] register_values;
-  wire cpu_halted;
-  reg [7:0] selected_register;
+    wire [7:0] sram_q;
 
-  pgrm_ram program_ram (
-      .clk(clk),
-      .address(program_address),
-      .data_in(program_data_in),
-      .write_enable(load_mode),
-      .byte_write_enable(program_byte_enable),
-      .data_out(program_data_out)
-  );
+    assign uio_out = 8'h00;
+    assign uio_oe  = 8'h00;
+    assign uo_out  = sram_q;
 
-  cpu_core cpu (
-      .clk(clk),
-      .rst_n(rst_n),
-      .run_enable(!load_mode),
-      .program_address(cpu_program_address),
-      .program_data(program_data_out),
-      .data_address(data_address),
-      .data_write_data(data_write_data),
-      .data_write_enable(data_write_enable),
-      .data_read_data(data_read_data),
-      .output_port(cpu_output),
-      .register_values(register_values),
-      .halted(cpu_halted)
-  );
+`ifdef SYNTH
+    // Tiny Tapeout's FPGA workflow defines SYNTH. Use an inferred memory
+    // on FPGA; the GF180 hard macro is only available in the ASIC flow.
+    reg [7:0] fpga_mem [0:63];
+    reg [7:0] fpga_q;
 
-  dataram data_memory (
-      .clk(clk),
-      .address(data_address),
-      .data_in(data_write_data),
-      .write_enable(data_write_enable),
-      .data_out(data_read_data)
-  );
+    always @(posedge clk) begin
+        if (!rst_n) begin
+            fpga_q <= 8'h00;
+        end else if (ena) begin
+            if (ui_in[6]) begin
+                fpga_mem[ui_in[5:0]] <= uio_in;
+            end else begin
+                fpga_q <= fpga_mem[ui_in[5:0]];
+            end
+        end
+    end
 
-  always @(*) begin
-    case (ui_in[5:4])
-      2'd0: selected_register = register_values[7:0];
-      2'd1: selected_register = register_values[15:8];
-      2'd2: selected_register = register_values[23:16];
-      default: selected_register = register_values[31:24];
-    endcase
-  end
+    assign sram_q = fpga_q;
 
-  assign uo_out = selected_register;
-  assign uio_out = load_mode ? 8'b0 : cpu_output;
-  assign uio_oe = load_mode ? 8'b0 : 8'hff;
+`elsif __pnr__
+    // LibreLane defines __pnr__ and supplies the black-box header through
+    // the MACROS configuration. VPWR/VGND are internal PDN nets, not user pins.
+    wire VPWR;
+    wire VGND;
 
-  wire _unused = &{ena, rst_n, cpu_halted, 1'b0};
+    gf180mcu_fd_ip_sram__sram64x8m8wm1 u_sram (
+        .VDD  (VPWR),
+        .VSS  (VGND),
+        .CLK  (clk),
+        .CEN  (~(ena & rst_n)),
+        .GWEN (~ui_in[6]),
+        .WEN  (8'h00),
+        .A    (ui_in[5:0]),
+        .D    (uio_in),
+        .Q    (sram_q)
+    );
+
+`else
+    // RTL simulation uses the official Google/GlobalFoundries timing model.
+    // Its power pins are tied off here; the functional model does not model
+    // power sequencing. The ASIC flow uses the physical macro branch above.
+    wire model_vdd = 1'b1;
+    wire model_vss = 1'b0;
+
+    gf180mcu_fd_ip_sram__sram64x8m8wm1 u_sram (
+        .CLK  (clk),
+        .CEN  (~(ena & rst_n)),
+        .GWEN (~ui_in[6]),
+        .WEN  (8'h00),
+        .A    (ui_in[5:0]),
+        .D    (uio_in),
+        .Q    (sram_q),
+        .VDD  (model_vdd),
+        .VSS  (model_vss)
+    );
+`endif
+
+    // ui_in[7] is reserved. All bidirectional pins are inputs in this example.
 
 endmodule
+
+`default_nettype wire

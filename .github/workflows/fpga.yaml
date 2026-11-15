@@ -2,18 +2,66 @@ name: fpga
 
 on:
   push:
-    # Comment out (or remove) the following line to run the FPGA workflow on every push:
-    branches: none
+    branches:
+      - main
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   fpga:
     runs-on: ubuntu-24.04
     steps:
-      - name: checkout repo
+      - name: Checkout project
         uses: actions/checkout@v6
         with:
           submodules: recursive
 
-      - name: FPGA bitstream for TT ASIC Sim (ICE40UP5K)
-        uses: TinyTapeout/tt-gds-action/fpga/ice40up5k@ttgf26c
+      - name: Checkout Tiny Tapeout support tools
+        uses: actions/checkout@v6
+        with:
+          repository: TinyTapeout/tt-support-tools
+          path: tt
+          ref: main
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install support-tool dependencies
+        shell: bash
+        run: pip install -r tt/requirements.txt
+
+      - name: Install project test dependencies
+        if: ${{ hashFiles('test/requirements.txt') != '' }}
+        shell: bash
+        run: pip install -r test/requirements.txt
+
+      - name: Fetch Verilog and build config
+        shell: bash
+        run: python tt/tt_tool.py --create-user-config
+
+      - name: Install OSS CAD Suite
+        uses: YosysHQ/setup-oss-cad-suite@v4
+        with:
+          github-token: ${{ github.token }}
+          python-override: true
+
+      - name: Create FPGA bitstream
+        shell: bash
+        run: python tt/tt_fpga.py harden
+
+      - name: Upload bitstream and build files
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: fpga_bitstream
+          path: |
+            build/*
+            docs/*
+            src/*
+            info.yaml
+            LICENSE

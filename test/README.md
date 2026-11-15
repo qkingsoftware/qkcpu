@@ -1,56 +1,30 @@
-# Sample testbench for a Tiny Tapeout project
+# GF180 SRAM simulation tests
 
-This is a sample testbench for a Tiny Tapeout project. It uses [cocotb](https://docs.cocotb.org/en/stable/) to drive the DUT and check the outputs.
-See below to get started or for more information, check the [website](https://tinytapeout.com/hdl/testing/).
+The Cocotb testbench drives the actual Tiny Tapeout top-level interface and
+independently exercises the official 64x8, 128x8, 256x8 and 512x8 SRAM models.
 
-## Setting up
+The vendor models contain specify timing paths, but Icarus Verilog 12 cannot
+elaborate their conditional bit-specific output path declarations: it reports
+source/destination width mismatches. Consequently the Icarus test intentionally
+runs the models' functional behavior with specify path checking disabled. The
+test clock is 100 ns (50 ns high and low), above the model's 55.6 ns minimum
+cycle and 25 ns minimum pulse widths. Physical setup/hold and macro timing are
+not waived: the ASIC flow reads the vendor Liberty files and runs STA. Do not
+interpret this functional RTL test as timing signoff.
 
-1. Edit [Makefile](Makefile) and modify `PROJECT_SOURCES` to point to your Verilog files.
-2. Edit [tb.v](tb.v) and replace `tt_um_example` with your module name.
-
-## How to run
-
-To run the RTL simulation:
+Run the RTL test:
 
 ```sh
 make -B
 ```
 
-The standalone program RAM test uses the two 128x8 SRAM macro models:
-
-```sh
-iverilog -o pgrm_ram_tb.vvp \
-  ../macros/gf180_sram_128x8/gf180mcu_fd_ip_sram__sram128x8m8wm1.v \
-  ../src/pgrm_ram.v pgrm_ram_tb.v
-vvp pgrm_ram_tb.vvp
-```
-
-To run gatelevel simulation, first harden your project and copy `../runs/wokwi/results/final/verilog/gl/{your_module_name}.v` to `gate_level_netlist.v`.
-
-Then run:
+For gate-level testing, first run the GF180 GDS workflow or copy the hardened
+Tiny Tapeout netlist to `gate_level_netlist.v`, then run:
 
 ```sh
 make -B GATES=yes
 ```
 
-If you wish to save the waveform in VCD format instead of FST format, edit tb.v to use `$dumpfile("tb.vcd");` and then run:
-
-```sh
-make -B FST=
-```
-
-This will generate `tb.vcd` instead of `tb.fst`.
-
-## How to view the waveform file
-
-Using GTKWave
-
-```sh
-gtkwave tb.fst tb.gtkw
-```
-
-Using Surfer
-
-```sh
-surfer tb.fst
-```
+The ASIC source list contains only the project RTL. The official behavioral
+SRAM models are simulation-only. The physical GDS, LEF and Liberty files are
+provided by the pinned submodule and registered in `src/config.json`.
