@@ -82,6 +82,7 @@
     "data_memory.data_memory VPWR VGND VDD VSS"
   ],
   "PDN_CFG": "dir::pdn_cfg.tcl",
+  "PRIMARY_GDSII_STREAMOUT_TOOL": "klayout",
 
   "//": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
   "//": "!!! DO NOT CHANGE ANYTHING BELOW THIS POINT !!!",
