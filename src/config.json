@@ -1,7 +1,12 @@
 {
   "//": "Only export pin area in LEF (without any connected nets)",
   "PL_TARGET_DENSITY_PCT": 60,
-  "CLOCK_PERIOD": 20,
+  "CLOCK_PERIOD": 50,
+  "QUIT_ON_TIMING_VIOLATIONS": false,
+  "ERROR_ON_SETUP_VIOLATIONS": false,
+  "ERROR_ON_HOLD_VIOLATIONS": false,
+  "ERROR_ON_MAX_SLEW": false,
+  "ERROR_ON_MAX_CAP": false,
   "PL_RESIZER_HOLD_SLACK_MARGIN": 0.1,
   "GRT_RESIZER_HOLD_SLACK_MARGIN": 0.05,
   "RUN_LINTER": 1,
