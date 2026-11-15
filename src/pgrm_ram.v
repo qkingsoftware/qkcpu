@@ -14,11 +14,11 @@ wire high_write_enable = write_enable && byte_write_enable[1];
 wire [7:0] low_write_mask = {8{~low_write_enable}};
 wire [7:0] high_write_mask = {8{~high_write_enable}};
 `ifdef __pnr__
-wire VPWR;
-wire VGND;
+wire VDD;
+wire VSS;
 `else
-supply1 VPWR;
-supply0 VGND;
+supply1 VDD;
+supply0 VSS;
 `endif
 
 // Yeah this was the macro part, this was done using AI sadly
@@ -49,8 +49,8 @@ gf180mcu_fd_ip_sram__sram128x8m8wm1 low_byte_ram (
     .A(address),
     .D(data_in[7:0]),
     .Q(low_byte),
-    .VDD(VPWR),
-    .VSS(VGND)
+    .VDD(VDD),
+    .VSS(VSS)
 );
 
 gf180mcu_fd_ip_sram__sram128x8m8wm1 high_byte_ram (
@@ -61,8 +61,8 @@ gf180mcu_fd_ip_sram__sram128x8m8wm1 high_byte_ram (
     .A(address),
     .D(data_in[15:8]),
     .Q(high_byte),
-    .VDD(VPWR),
-    .VSS(VGND)
+    .VDD(VDD),
+    .VSS(VSS)
 );
 
 assign data_out = {high_byte, low_byte};

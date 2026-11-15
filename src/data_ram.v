@@ -8,11 +8,11 @@ module dataram (
 
 wire [7:0] write_enable_mask = {8{~write_enable}};
 `ifdef __pnr__
-wire VPWR;
-wire VGND;
+wire VDD;
+wire VSS;
 `else
-supply1 VPWR;
-supply0 VGND;
+supply1 VDD;
+supply0 VSS;
 `endif
 
 /*
@@ -37,8 +37,8 @@ gf180mcu_fd_ip_sram__sram128x8m8wm1 data_memory (
     .A(address),
     .D(data_in),
     .Q(data_out),
-    .VDD(VPWR),
-    .VSS(VGND)
+    .VDD(VDD),
+    .VSS(VSS)
 );
 
 endmodule
