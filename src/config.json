@@ -53,15 +53,15 @@
       "instances": {
         "u_sram0": {
           "location": [
-            60,
-            180
+            45,
+            35
           ],
           "orientation": "N"
         },
         "u_sram1": {
           "location": [
-            540,
-            180
+            45,
+            342
           ],
           "orientation": "N"
         }
