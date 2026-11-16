@@ -12,7 +12,9 @@ module register_bank (
     output wire [7:0] read_data_b,
     output wire [31:0] register_values
 );
-
+    // QKing here!
+    // I wanted to add more, but I used 2 bit binary for the selection process
+    // So stuck at 4, time to abuse the dataram for more!
     reg [7:0] regA;
     reg [7:0] regB;
     reg [7:0] regR;

@@ -10,7 +10,7 @@ project:
   # Two 128x8 SRAM macros (431.86 x 268.88 um each) placed side by side.
   tiles: "3x4"
 
-  top_module: "QKCPU"
+  top_module: "tt_um_QKCPU"
 
   source_files:
     - "project.v"

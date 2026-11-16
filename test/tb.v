@@ -16,7 +16,7 @@ module tb;
   wire VGND = 1'b0;
 `endif
 
-  QKCPU user_project (
+  tt_um_QKCPU user_project (
 `ifdef GL_TEST
     .VPWR(VPWR),
     .VGND(VGND),
