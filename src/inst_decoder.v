@@ -1,5 +1,7 @@
 `default_nettype none
 
+// The instruction decoder module
+// It takes the instruction and decodes it into its parts for the control unit to use in its processing
 module inst_decoder (
     input wire [15:0] instruction,
 

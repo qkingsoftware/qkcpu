@@ -1,3 +1,6 @@
+// Control unit module
+// This is the FSM and I give gave it a name I was tired...
+
 `default_nettype none
 
 module control_unit (
@@ -37,6 +40,9 @@ module control_unit (
 
     assign halted = (state == STATE_HALTED);
 
+
+    // The FSM logic itself
+    // It handles: fetching, executing, and loading instructions outside the instruction decoder
     always @(*) begin
         next_state = state;
 

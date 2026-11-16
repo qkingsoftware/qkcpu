@@ -1,3 +1,7 @@
+// Program counter!
+// It counts till 64 at max, maybe I need to upgrade it later....
+// It already uses 3x4 tiles and that is a lot, I am not expanding anymore
+
 `default_nettype none
 
 module pgrm_counter (
