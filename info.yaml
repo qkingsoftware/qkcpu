@@ -3,9 +3,9 @@ project:
   title:        "QKCPU"
   author:       "QKing"
   discord:      ""
-  description:  "8-bit CPU with Dual 128x8 GF180 SRAM (Program and Data RAM)"
+  description:  "8-bit CPU with custom ISA, seperate data and program ram and a small register bank."
   language:     "Verilog"
-  clock_hz:     20000000
+  clock_hz:     20000000 #50MHZ
 
   # Two 128x8 SRAM macros (431.86 x 268.88 um each) placed side by side.
   tiles: "3x4"

@@ -1,3 +1,6 @@
+// This combines all the modules into one
+// This file itself doesnt do much
+// It just connects modules together and wires them
 `default_nettype none
 
 module cpu_core (
