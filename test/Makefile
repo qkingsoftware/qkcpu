@@ -12,7 +12,7 @@ SRAM_CELLS = \
 	gf180mcu_fd_ip_sram__sram512x8m8wm1
 SRAM_MODELS = $(foreach cell,$(SRAM_CELLS),$(SRAM_DIR)/cells/$(cell)/$(cell).v)
 
-PROJECT_SOURCES = project.v cpu_core.v control_unit.v inst_decoder.v register_bank.v pgrm_counter.v alu.v
+PROJECT_SOURCES = project.v cpu_core.v control_unit.v inst_decoder.v register_bank.v pgrm_counter.v alu.v gpio_pwm.v
 
 ifneq ($(GATES),yes)
 

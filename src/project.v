@@ -20,16 +20,26 @@ module tt_um_QKCPU (
     wire [7:0]  cpu_data_write_data;
     wire        cpu_data_write_enable;
     wire [7:0]  cpu_data_read_data;
+    wire [7:0]  sram_data_read_data;
+    wire [7:0]  mmio_data_read_data;
+    wire        mmio_hit;
     wire [7:0]  cpu_output;
     wire [31:0] register_values;
     wire        cpu_halted;
+
+    wire [7:0]  gpio_uio_out;
+    wire [7:0]  gpio_uio_oe;
 
     wire [6:0] prgm_ram_addr = load_mode ? loader_address : cpu_program_address;
     wire [7:0] prgm_ram_din  = uio_in;
     wire       prgm_ram_we   = load_mode;
     wire [7:0] prgm_ram_dout;
 
-    assign cpu_program_data = prgm_ram_dout;
+    // Prevent MMIO writes (0x60..0x7F) from writing into SRAM1
+    wire sram1_we = cpu_data_write_enable && !mmio_hit;
+
+    assign cpu_program_data   = prgm_ram_dout;
+    assign cpu_data_read_data = mmio_hit ? mmio_data_read_data : sram_data_read_data;
 
     cpu_core cpu (
         .clk(clk),
@@ -47,6 +57,19 @@ module tt_um_QKCPU (
         .halted(cpu_halted)
     );
 
+    gpio_pwm u_gpio_pwm (
+        .clk(clk),
+        .rst_n(rst_n),
+        .bus_we(cpu_data_write_enable),
+        .bus_addr(cpu_data_address),
+        .bus_wdata(cpu_data_write_data),
+        .bus_rdata(mmio_data_read_data),
+        .mmio_hit(mmio_hit),
+        .uio_in(uio_in),
+        .uio_out(gpio_uio_out),
+        .uio_oe(gpio_uio_oe)
+    );
+
 `ifdef SYNTH
     reg [7:0] sram0_mem [0:127];
     reg [7:0] sram1_mem [0:127];
@@ -59,14 +82,14 @@ module tt_um_QKCPU (
                 sram0_mem[prgm_ram_addr] <= prgm_ram_din;
             sram0_q <= sram0_mem[prgm_ram_addr];
 
-            if (cpu_data_write_enable)
+            if (sram1_we)
                 sram1_mem[cpu_data_address] <= cpu_data_write_data;
             sram1_q <= sram1_mem[cpu_data_address];
         end
     end
 
-    assign prgm_ram_dout      = sram0_q;
-    assign cpu_data_read_data = sram1_q;
+    assign prgm_ram_dout       = sram0_q;
+    assign sram_data_read_data = sram1_q;
 
 `elsif __pnr__
     wire VPWR;
@@ -89,11 +112,11 @@ module tt_um_QKCPU (
         .VSS  (VGND),
         .CLK  (clk),
         .CEN  (~(ena & rst_n)),
-        .GWEN (~cpu_data_write_enable),
+        .GWEN (~sram1_we),
         .WEN  (8'h00),
         .A    (cpu_data_address),
         .D    (cpu_data_write_data),
-        .Q    (cpu_data_read_data)
+        .Q    (sram_data_read_data)
     );
 
 `else
@@ -115,11 +138,11 @@ module tt_um_QKCPU (
     gf180mcu_fd_ip_sram__sram128x8m8wm1 u_sram1 (
         .CLK  (clk),
         .CEN  (~(ena & rst_n)),
-        .GWEN (~cpu_data_write_enable),
+        .GWEN (~sram1_we),
         .WEN  (8'h00),
         .A    (cpu_data_address),
         .D    (cpu_data_write_data),
-        .Q    (cpu_data_read_data),
+        .Q    (sram_data_read_data),
         .VDD  (model_vdd),
         .VSS  (model_vss)
     );
@@ -135,11 +158,14 @@ module tt_um_QKCPU (
         endcase
     end
 
-    assign uo_out  = selected_register;
-    assign uio_out = load_mode ? 8'h00 : cpu_output;
-    assign uio_oe  = load_mode ? 8'h00 : 8'hFF;
+    // Runtime: uo_out shows CPU OUT port; Halted/Load: uo_out shows selected register
+    assign uo_out  = (load_mode || cpu_halted) ? selected_register : cpu_output;
 
-    wire _unused = &{ena, rst_n, cpu_halted, ui_in[6:0], 1'b0};
+    // Load mode: uio is Hi-Z input for program loading; Runtime: per-pin GPIO/PWM controller
+    assign uio_out = load_mode ? 8'h00 : gpio_uio_out;
+    assign uio_oe  = load_mode ? 8'h00 : gpio_uio_oe;
+
+    wire _unused = &{ena, rst_n, ui_in[6:0], 1'b0};
 
 endmodule
 

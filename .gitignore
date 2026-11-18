@@ -14,3 +14,4 @@ test/gate_level_netlist.v
 tools/
 QKCPU_ISA_v2.csv
 *.bin
+qkcpu.zip

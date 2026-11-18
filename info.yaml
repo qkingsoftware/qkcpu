@@ -3,7 +3,7 @@ project:
   title:        "QKCPU"
   author:       "QKing"
   discord:      ""
-  description:  "8-bit CPU with custom ISA, seperate data and program ram and a small register bank."
+  description:  "8-bit CPU with custom ISA, separate data and program RAM, and per-pin GPIO/PWM."
   language:     "Verilog"
   clock_hz:     50000000 #50MHZ
 
@@ -20,38 +20,39 @@ project:
     - "register_bank.v"
     - "pgrm_counter.v"
     - "alu.v"
+    - "gpio_pwm.v"
 
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
 pinout:
   # Inputs
-  ui[0]: "Loader addr 0"
-  ui[1]: "Loader addr 1"
-  ui[2]: "Loader addr 2"
-  ui[3]: "Loader addr 3"
-  ui[4]: "Loader addr 4 / Reg sel 0"
-  ui[5]: "Loader addr 5 / Reg sel 1"
-  ui[6]: "Loader addr 6"
+  ui[0]: "Loader addr 0 / CPU in 0"
+  ui[1]: "Loader addr 1 / CPU in 1"
+  ui[2]: "Loader addr 2 / CPU in 2"
+  ui[3]: "Loader addr 3 / CPU in 3"
+  ui[4]: "Loader addr 4 / Reg sel 0 / CPU in 4"
+  ui[5]: "Loader addr 5 / Reg sel 1 / CPU in 5"
+  ui[6]: "Loader addr 6 / CPU in 6"
   ui[7]: "Program load mode (1=Load, 0=Run)"
 
   # Outputs
-  uo[0]: "Reg view bit 0"
-  uo[1]: "Reg view bit 1"
-  uo[2]: "Reg view bit 2"
-  uo[3]: "Reg view bit 3"
-  uo[4]: "Reg view bit 4"
-  uo[5]: "Reg view bit 5"
-  uo[6]: "Reg view bit 6"
-  uo[7]: "Reg view bit 7"
+  uo[0]: "CPU out 0 (Reg view when halted)"
+  uo[1]: "CPU out 1 (Reg view when halted)"
+  uo[2]: "CPU out 2 (Reg view when halted)"
+  uo[3]: "CPU out 3 (Reg view when halted)"
+  uo[4]: "CPU out 4 (Reg view when halted)"
+  uo[5]: "CPU out 5 (Reg view when halted)"
+  uo[6]: "CPU out 6 (Reg view when halted)"
+  uo[7]: "CPU out 7 (Reg view when halted)"
 
   # Bidirectional pins
-  uio[0]: "Loader data 0 / CPU out 0"
-  uio[1]: "Loader data 1 / CPU out 1"
-  uio[2]: "Loader data 2 / CPU out 2"
-  uio[3]: "Loader data 3 / CPU out 3"
-  uio[4]: "Loader data 4 / CPU out 4"
-  uio[5]: "Loader data 5 / CPU out 5"
-  uio[6]: "Loader data 6 / CPU out 6"
-  uio[7]: "Loader data 7 / CPU out 7"
+  uio[0]: "Loader data 0 / GPIO-PWM 0"
+  uio[1]: "Loader data 1 / GPIO-PWM 1"
+  uio[2]: "Loader data 2 / GPIO-PWM 2"
+  uio[3]: "Loader data 3 / GPIO-PWM 3"
+  uio[4]: "Loader data 4 / GPIO-PWM 4"
+  uio[5]: "Loader data 5 / GPIO-PWM 5"
+  uio[6]: "Loader data 6 / GPIO-PWM 6"
+  uio[7]: "Loader data 7 / GPIO-PWM 7"
 
 # Do not change!
 yaml_version: 6

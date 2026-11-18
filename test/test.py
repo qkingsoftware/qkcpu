@@ -1,11 +1,10 @@
-# SPDX-License-Identifier: Apache-2.0
+                                     
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles, FallingEdge, RisingEdge, Timer
 
 
 async def exercise_macro(dut, prefix, address):
-    """Write, read, and test the active-low bit mask of one vendor SRAM model."""
     cen = getattr(dut, f"{prefix}_cen")
     gwen = getattr(dut, f"{prefix}_gwen")
     wen = getattr(dut, f"{prefix}_wen")
@@ -13,7 +12,6 @@ async def exercise_macro(dut, prefix, address):
     data = getattr(dut, f"{prefix}_d")
     q = getattr(dut, f"{prefix}_q")
 
-    # CEN must be high for a clock before the first active cycle.
     await FallingEdge(dut.clk)
     cen.value = 0
     gwen.value = 0
@@ -24,14 +22,12 @@ async def exercise_macro(dut, prefix, address):
     await RisingEdge(dut.clk)
     await Timer(1, unit="ns")
 
-    # Read the location on the next rising edge.
     await FallingEdge(dut.clk)
     gwen.value = 1
     await RisingEdge(dut.clk)
     await Timer(50, unit="ns")
     assert int(q.value) == 0xA5, f"{prefix}: full-byte write/read failed"
 
-    # WEN is an active-low bit mask. 0xFE writes only bit 0.
     await FallingEdge(dut.clk)
     gwen.value = 0
     wen.value = 0xFE
@@ -49,17 +45,34 @@ async def exercise_macro(dut, prefix, address):
     cen.value = 1
 
 
+async def load_program(dut, program):
+    for inst_idx, instruction in enumerate(program):
+        byte_lo_addr = inst_idx * 2
+        byte_hi_addr = inst_idx * 2 + 1
+
+        await FallingEdge(dut.clk)
+        dut.ui_in.value = 0x80 | byte_lo_addr
+        dut.uio_in.value = instruction & 0xFF
+        await RisingEdge(dut.clk)
+        await Timer(1, unit="ns")
+
+        await FallingEdge(dut.clk)
+        dut.ui_in.value = 0x80 | byte_hi_addr
+        dut.uio_in.value = (instruction >> 8) & 0xFF
+        await RisingEdge(dut.clk)
+        await Timer(1, unit="ns")
+
+
 @cocotb.test()
 async def test_sram_template(dut):
-    dut._log.info("Starting QKCPU with Dual GF180 SRAM tests")
+    dut._log.info("Starting QKCPU with Runtime uo_out & Per-Pin GPIO/PWM tests")
 
     clock = Clock(dut.clk, 100, unit="ns")
     dut.rst_n.value = 0
     dut.ena.value = 1
-    dut.ui_in.value = 0x80  # Start in loader mode
+    dut.ui_in.value = 0x80                        
     dut.uio_in.value = 0
 
-    # Keep all standalone macro testbench instances inactive
     for prefix in ("sram64_test", "sram128_test", "sram256_test", "sram512_test"):
         getattr(dut, f"{prefix}_cen").value = 1
         getattr(dut, f"{prefix}_gwen").value = 1
@@ -70,51 +83,62 @@ async def test_sram_template(dut):
     cocotb.start_soon(clock.start(start_high=False))
     await ClockCycles(dut.clk, 5)
 
-    # Reset CPU
     dut.rst_n.value = 1
     await ClockCycles(dut.clk, 2)
 
-    # Load CPU Program into Program RAM (SRAM0) via Loader:
-    # Program:
-    # 0x80A8: LDI R0, 42
-    # 0xC000: OUT R0
-    # 0xF000: HALT
-    program = [0x80A8, 0xC000, 0xF000]
-    for inst_idx, instruction in enumerate(program):
-        byte_lo_addr = inst_idx * 2
-        byte_hi_addr = inst_idx * 2 + 1
 
-        # Write low byte
-        await FallingEdge(dut.clk)
-        dut.ui_in.value = 0x80 | byte_lo_addr
-        dut.uio_in.value = instruction & 0xFF
-        await RisingEdge(dut.clk)
-        await Timer(1, unit="ns")
+    program = [
+        0x80A8,                                
+        0xC000,                                                            
+        0x840C,                                                       
+        0x8980,                                                    
+        0xA181,                                                                             
+        0x8600,                                              
+        0x89C0,                                                    
+        0xA181,                                            
+        0x8408,                                                   
+        0x8984,                                                    
+        0xA181,                                                            
+        0x8600,                                              
+        0x89C4,                                                    
+        0xA181,                                            
+        0x8855,                                                                               
+        0xF000,            
+    ]
+    await load_program(dut, program)
 
-        # Write high byte
-        await FallingEdge(dut.clk)
-        dut.ui_in.value = 0x80 | byte_hi_addr
-        dut.uio_in.value = (instruction >> 8) & 0xFF
-        await RisingEdge(dut.clk)
-        await Timer(1, unit="ns")
-
-    # Exit loader mode: switch to Run Mode (ui_in[7]=0)
+                                                                                             
     await FallingEdge(dut.clk)
-    dut.ui_in.value = 0x00  # run mode, select R0 (ui_in[5:4] = 2'b00)
+    dut.ui_in.value = 0x20
 
-    # Let CPU run for 25 clock cycles
-    await ClockCycles(dut.clk, 25)
+                                                                    
+    await ClockCycles(dut.clk, 12)
+    assert int(dut.uo_out.value) == 42, f"Expected runtime uo_out=42, got {int(dut.uo_out.value)}"
 
-    # Check that R0 was loaded with 42 and output to uo_out
-    assert int(dut.uo_out.value) == 42, f"Expected R0=42 on uo_out, got {int(dut.uo_out.value)}"
-    # Check that OUT R0 sent 42 to uio_out
-    assert int(dut.uio_out.value) == 42, f"Expected 42 on uio_out, got {int(dut.uio_out.value)}"
-    assert int(dut.uio_oe.value) == 0xFF, f"Expected uio_oe=0xFF in run mode, got {int(dut.uio_oe.value)}"
+                                                       
+    await ClockCycles(dut.clk, 70)
 
-    # Exercise each official macro model in testbench
+                                                                                    
+    assert int(dut.uo_out.value) == 0x15, f"Expected halted reg view R2=21 on uo_out, got {int(dut.uo_out.value)}"
+
+                                                                                     
+    assert int(dut.uio_oe.value) == 0x03, f"Expected uio_oe=0x03, got {int(dut.uio_oe.value):#04x}"
+                                     
+    assert (int(dut.uio_out.value) & 0x01) == 1, "Expected uio_out[0] == 1"
+
+                                                                                
+    pwm_high_cycles = 0
+    for _ in range(256):
+        await RisingEdge(dut.clk)
+        await Timer(1, unit="ns")
+        if (int(dut.uio_out.value) >> 1) & 1:
+            pwm_high_cycles += 1
+    assert 120 <= pwm_high_cycles <= 136, f"Expected ~128 PWM high cycles, got {pwm_high_cycles}"
+
+                                                     
     await exercise_macro(dut, "sram64_test", 63)
     await exercise_macro(dut, "sram128_test", 127)
     await exercise_macro(dut, "sram256_test", 255)
     await exercise_macro(dut, "sram512_test", 511)
 
-    dut._log.info("All QKCPU and GF180 SRAM tests passed successfully!")
+    dut._log.info("All QKCPU runtime I/O, per-pin GPIO/PWM, and SRAM tests passed!")
