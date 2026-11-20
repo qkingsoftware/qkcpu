@@ -33,3 +33,6 @@ module inst_decoder (
 endmodule
 
 `default_nettype wire
+
+// If you read this, say hello!
+// Comments are fun
