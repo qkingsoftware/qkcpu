@@ -158,14 +158,10 @@ module tt_um_QKCPU (
         endcase
     end
 
-    // Runtime: uo_out shows CPU OUT port; Halted/Load: uo_out shows selected register
     assign uo_out  = (load_mode || cpu_halted) ? selected_register : cpu_output;
 
-    // Load mode: uio is Hi-Z input for program loading; Runtime: per-pin GPIO/PWM controller
     assign uio_out = load_mode ? 8'h00 : gpio_uio_out;
     assign uio_oe  = load_mode ? 8'h00 : gpio_uio_oe;
-
-    wire _unused = &{ena, rst_n, ui_in[6:0], 1'b0};
 
 endmodule
 
