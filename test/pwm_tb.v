@@ -10,10 +10,10 @@ reg [6:0] bus_addr = 0;
 reg [7:0] bus_wdata = 0;
 wire [7:0] bus_rdata;
 wire       mmio_hit;
-wire [7:0] uio_in = 0;
-wire [7:0] uio_out = 0;
-wire [7:0] uio_oe = 0;
-
+reg [7:0] uio_in = 0;
+wire [7:0] uio_out;
+wire [7:0] uio_oe;
+    
 // dut init
 gpio_pwm dut (
     .clk(clk),
