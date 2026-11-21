@@ -16,3 +16,4 @@ QKCPU_ISA_v2.csv
 *.bin
 qkcpu.zip
 test/sim.vvp
+pwm_sim
