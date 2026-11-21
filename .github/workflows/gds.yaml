@@ -81,6 +81,26 @@ jobs:
           tools-repo: opilitethesmartdev/tt-support-tools-gds-vhdl-patch
           tools-ref: fix/render-tt-design-top
 
+      
+      - name: Download submission artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: tt_submission
+          path: patched-artifact
+
+      - name: Fix internal power-pin LEF geometry
+        run: |
+          python3 .github/scripts/fix_lef_power_pins.py \
+            patched-artifact/tt_submission/tt_um_QKCPU.lef
+
+      - name: Publish corrected submission artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: tt_submission
+          path: patched-artifact/*
+          overwrite: true
+    
+
   precheck:
     needs: gds
     runs-on: ubuntu-24.04
