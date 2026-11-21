@@ -48,15 +48,15 @@
       "instances": {
         "u_sram0": {
           "location": [
-            50,
-            190
+            53.14,
+            185.56
           ],
           "orientation": "N"
         },
         "u_sram1": {
           "location": [
-            531.86,
-            190
+            535.0,
+            185.56
           ],
           "orientation": "N"
         }
