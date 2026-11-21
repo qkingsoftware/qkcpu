@@ -1,12 +1,7 @@
 {
   "//": "Only export pin area in LEF (without any connected nets)",
   "PL_TARGET_DENSITY_PCT": 60,
-  "CLOCK_PERIOD": 50,
-  "QUIT_ON_TIMING_VIOLATIONS": false,
-  "ERROR_ON_SETUP_VIOLATIONS": false,
-  "ERROR_ON_HOLD_VIOLATIONS": false,
-  "ERROR_ON_MAX_SLEW": false,
-  "ERROR_ON_MAX_CAP": false,
+  "CLOCK_PERIOD": 20,
   "PL_RESIZER_HOLD_SLACK_MARGIN": 0.1,
   "GRT_RESIZER_HOLD_SLACK_MARGIN": 0.05,
   "RUN_LINTER": 1,
@@ -78,7 +73,7 @@
   "meta": {
     "flow": "Classic"
   },
-  "MAGIC_DRC_USE_GDS": true,
+  "MAGIC_DRC_USE_GDS": false,
   "MAGIC_EXT_ABSTRACT_CELLS": [
     "gf180mcu_fd_sc_mcu7t5v0__.*",
     "gf180mcu_fd_ip_sram__sram128x8m8wm1"
