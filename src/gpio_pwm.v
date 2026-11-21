@@ -31,6 +31,7 @@ module gpio_pwm (
     always @(posedge clk) begin
         if (!rst_n) begin
             pwm_cnt     <= 8'd0;
+            pwm_period  <= 8'hFF;
             pin_out_val <= 8'd0;
             bus_rdata   <= 8'd0;
             for (i = 0; i < 8; i = i + 1) begin
@@ -46,14 +47,16 @@ module gpio_pwm (
                         pin_mode[bus_addr[2:0]] <= 2'b00;
                     end else if (bus_wdata == 8'h02) begin
                         pin_mode[bus_addr[2:0]] <= 2'b10;
+                    end else if (bus_wdata == 8'h04) begin
+                        pin_mode[bus_addr[2:0]] <= 2'b11;
                     end else if (bus_wdata[0] == 1'b1) begin
                         pin_mode[bus_addr[2:0]]    <= 2'b01;
                         pin_out_val[bus_addr[2:0]] <= bus_wdata[1];
-                    end else if (bus_wdata == 8'h04) begin
-                    pin_mode[bus_addr[2:0]] <= 2'b11;    
                     end
                 end else if (bus_addr >= 7'h70 && bus_addr <= 7'h77) begin
                     pwm_duty[bus_addr[2:0]] <= bus_wdata;
+                end else if (bus_addr == 7'h79) begin
+                    pwm_period <= bus_wdata;
                 end
             end
 
@@ -65,8 +68,6 @@ module gpio_pwm (
                 bus_rdata <= uio_in;
             end else if (bus_addr == 7'h79) begin
                 bus_rdata <= pwm_period;
-            end else if (bus_addr == 7'h79) begin
-                bus_rdata <= pwm_period;    
             end else begin
                 bus_rdata <= 8'd0;
             end
