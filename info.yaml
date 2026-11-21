@@ -5,7 +5,7 @@ project:
   discord:      ""
   description:  "8-bit CPU with custom ISA, separate data and program RAM, and per-pin GPIO/PWM."
   language:     "Verilog"
-  clock_hz:     50000000 #50MHZ
+  clock_hz:     25000000 #25mhz
 
   # Two 128x8 SRAM macros (431.86 x 268.88 um each) placed side by side.
   tiles: "3x4"
