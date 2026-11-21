@@ -1,8 +1,5 @@
 // Program counter!
-// It counts till 64 at max, maybe I need to upgrade it later....
-// It already uses 3x4 tiles and that is a lot, I am not expanding anymore
-// Hey QKing here, 6 bits might be a bit low for this....
-// Shall I increase it?
+// Counts to 64 (6-bit binary)
 
 `default_nettype none
 
