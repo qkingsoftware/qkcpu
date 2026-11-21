@@ -54,14 +54,14 @@
         "u_sram0": {
           "location": [
             60,
-            180
+            190
           ],
           "orientation": "N"
         },
         "u_sram1": {
           "location": [
             540,
-            180
+            190
           ],
           "orientation": "N"
         }
