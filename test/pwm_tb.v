@@ -8,13 +8,11 @@ reg rst_n = 0;
 reg bus_we = 0;
 reg [6:0] bus_addr = 0;
 reg [7:0] bus_wdata = 0;
-wire [7:0] bus_rdata = 0;
+wire [7:0] bus_rdata;
+wire       mmio_hit;
 wire [7:0] uio_in = 0;
 wire [7:0] uio_out = 0;
-wire mmio_hit = 0;
 wire [7:0] uio_oe = 0;
-wire [7:0] uio_out = 0;
-
 
 // dut init
 gpio_pwm dut (
@@ -49,13 +47,13 @@ task check(input cond, input [8*40-1:0] name);
 endtask
 
 // Seduce the MMIO register (only write for one clock cycle to the mmio register)
-task mmio_write
+task mmio_write(input [6:0] addr, input [7:0] data);
     begin
         @(negedge clk);
         bus_we = 1;
-        byus_addr = addr;
+        bus_addr = addr;
         bus_wdata = data;
-        @negedge clk);
+        @(negedge clk);
         bus_we = 0;
         bus_addr = 7'h00;
         bus_wdata = 8'h00;
@@ -80,7 +78,6 @@ endtask
 reg [7:0] rd;
 integer high_cycles;
 integer cyc;
-integer wrap_start;
 integer wrap_len;
 
 // the test :tada: (please somehow have emoji markdown)
@@ -89,7 +86,7 @@ initial begin
     $dumpvars(0, pwm_tb);
 
     // reset the cpu
-    rsnt_n = 0;
+    rst_n = 0;
     repeat (4) @(posedge clk);
     rst_n = 1;
     @(negedge clk);
@@ -97,7 +94,7 @@ initial begin
     // wipe values out of existence
     mmio_read(7'h79, rd);
     check(rd == 8'hFF, "Period 0xFF after reset");
-    check(uio_out == 8'h00, "All uio pins must be outputs after a reset");
+    check(uio_oe == 8'h00, "all uio pins are inputs after reset");
 
     // Set period register
     mmio_write(7'h79, 8'h7F);
@@ -106,7 +103,6 @@ initial begin
 
     // Let counter reach 0 and time the next wrap
     while (dut.pwm_cnt != 8'd0) @(posedge clk);
-    wrap_start = 0;
     cyc = 0;
     @(posedge clk);
     while (dut.pwm_cnt != 8'd0) begin
